@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<script>(function(){try{var t=localStorage.getItem('anamnesis_theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<title>ANAMNESIS · READ</title>
+<style>
+  :root{
+    color-scheme: light;
+    --ivory:#EDEAE4; --paper:#E3DFD7; --ink:#2B2A28;
+    --muted:#6E6B66; --line:#B9B4AC; --board:#9C968C;
+    box-sizing:border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --ivory:#171615; --paper:#232120; --ink:#EDEAE4; --muted:#A39D94; --line:#4A4744; --board:#5A554F;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --ivory:#171615; --paper:#232120; --ink:#EDEAE4; --muted:#A39D94; --line:#4A4744; --board:#5A554F;
+  }
+  html{ scroll-padding-top: env(safe-area-inset-top, 0px); height:100%; }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; min-height:100%; background:var(--ivory); color:var(--ink);
+    font-family: Georgia, 'Nanum Myeongjo', serif;
+  }
+  .wrap{ max-width:640px; margin:0 auto; padding:2.2rem 1.4rem 4rem; }
+  .kicker{ font-family: Arial, sans-serif; font-size:0.7rem; letter-spacing:0.25em; color:var(--muted); margin-bottom:0.3rem; }
+  h1{ font-size:1.9rem; margin:0 0 0.2rem; letter-spacing:0.02em; }
+  .sub{ font-size:0.85rem; color:var(--muted); font-style:italic; margin-bottom:1.6rem; }
+  .card{ background:var(--paper); padding:1.3rem; margin-bottom:1.6rem; border-radius:2px; }
+  label{ display:block; font-family:Arial,sans-serif; font-size:0.7rem; letter-spacing:0.08em; color:var(--muted); margin-bottom:0.3rem; }
+  input[type=text], textarea{
+    width:100%; border:none; border-bottom:1px solid var(--line); background:transparent;
+    font-family:inherit; font-size:0.95rem; color:var(--ink); padding:0.4rem 0; margin-bottom:1rem; resize:vertical;
+  }
+  input[type=text]:focus, textarea:focus{ outline:none; border-bottom-color:var(--ink); }
+  button.act{
+    font-family:Arial,sans-serif; font-size:0.78rem; letter-spacing:0.08em; padding:0.6rem 1.3rem;
+    background:var(--ink); color:var(--ivory); border:none; cursor:pointer; border-radius:2px;
+  }
+  .status{ font-family:Arial,sans-serif; font-size:0.72rem; color:var(--muted); margin-left:0.7rem; }
+  .section-label{ font-family:Arial,sans-serif; font-size:0.7rem; letter-spacing:0.1em; color:var(--muted); margin:1.8rem 0 0.8rem; }
+
+  .shelf-row{
+    display:flex; align-items:flex-end; gap:3px; height:196px; padding:0 6px;
+    border-bottom:9px solid var(--board); margin-bottom:12px;
+  }
+  .spine{
+    flex:none; border:none; cursor:pointer; color:#EDEAE4; padding:10px 0;
+    writing-mode:vertical-rl; text-orientation:mixed; overflow:hidden;
+    font-family:inherit; font-size:0.8rem; letter-spacing:0.12em; line-height:1;
+    text-align:start; border-radius:2px 2px 0 0;
+    box-shadow: inset 0 7px 0 rgba(255,255,255,0.12), inset 0 -7px 0 rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.07);
+    transition: transform .15s ease;
+  }
+  .spine span{ display:block; max-height:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .spine:hover, .spine.sel{ transform: translateY(-8px); }
+  .shelf-empty{ font-family:Arial,sans-serif; font-size:0.78rem; color:var(--muted); margin:-0.2rem 0 0.4rem 0.4rem; }
+
+  .detail{ margin-top:0.4rem; }
+  .detail h3{ font-size:1rem; margin:0 0 0.6rem; font-weight:700; }
+  .entry{ border-top:1px solid var(--line); padding:0.9rem 0; }
+  .entry:first-of-type{ border-top:none; }
+  .entry .meta{ font-family:Arial,sans-serif; font-size:0.68rem; letter-spacing:0.05em; color:var(--muted); margin-bottom:0.25rem; }
+  .entry .body{ font-size:0.92rem; line-height:1.5; white-space:pre-wrap; }
+
+  .topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem; }
+  .topbar .kicker{ margin-bottom:0; }
+  .theme{
+    font-family:Arial,sans-serif; font-size:0.66rem; letter-spacing:0.08em; background:transparent;
+    border:1px solid var(--line); color:var(--muted); padding:0.3rem 0.7rem; border-radius:2px; cursor:pointer;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="kicker">ANAMNESIS</div><button class="theme" id="themeBtn" type="button" aria-label="화면 모드 전환"></button></div>
+  <h1>READ</h1>
+  <div class="sub">읽은 책이 책장에 꽂힌다</div>
+
+  <div class="card">
+    <label for="bookTitle">책 제목</label>
+    <input type="text" id="bookTitle" placeholder="예: 잃어버린 시간을 찾아서">
+    <label for="readNote">어디까지 읽었는지</label>
+    <textarea id="readNote" rows="3" placeholder="예: 1권 콩브레, 마들렌 장면까지"></textarea>
+    <button class="act" id="saveRead" type="button">책장에 꽂기</button>
+    <span class="status" id="readStatus"></span>
+  </div>
+
+  <div class="section-label">나의 책장</div>
+  <div id="shelf"></div>
+  <div class="detail" id="bookDetail"></div>
+</div>
+
+<script>
+const KEY = 'anamnesis_read_v1';
+const SPINE_COLORS = ['#3B3835', '#4A4540', '#5A5249', '#6B5F52', '#2F2D2B', '#54504A', '#463F38'];
+const NO_TITLE = '제목 없음';
+
+function loadEntries(){
+  try {
+    const raw = localStorage.getItem(KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+function saveEntries(arr){
+  try { localStorage.setItem(KEY, JSON.stringify(arr)); return true; }
+  catch (e) { return false; }
+}
+function hash(str){
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+let selectedBook = null;
+
+function renderRead(){
+  const reads = loadEntries();
+  const groups = new Map();
+  reads.forEach(e => {
+    const t = (e.title || '').trim() || NO_TITLE;
+    if (!groups.has(t)) groups.set(t, []);
+    groups.get(t).push(e);
+  });
+  const books = Array.from(groups.entries()).map(([t, list]) => ({
+    title: t,
+    entries: list.slice().sort((a, b) => a.createdAt - b.createdAt)
+  })).sort((a, b) => a.entries[0].createdAt - b.entries[0].createdAt);
+
+  const shelf = document.getElementById('shelf');
+  shelf.textContent = '';
+  const PER_ROW = 6;
+  const rowCount = Math.max(1, Math.ceil(books.length / PER_ROW));
+  for (let r = 0; r < rowCount; r++){
+    const row = el('div', 'shelf-row');
+    books.slice(r * PER_ROW, (r + 1) * PER_ROW).forEach(b => {
+      const h = hash(b.title);
+      const spine = el('button', 'spine' + (b.title === selectedBook ? ' sel' : ''));
+      spine.type = 'button';
+      spine.style.height = (128 + (h % 5) * 14) + 'px';
+      spine.style.width = (30 + Math.min(b.entries.length - 1, 4) * 3 + (h % 3) * 3) + 'px';
+      spine.style.background = SPINE_COLORS[h % SPINE_COLORS.length];
+      spine.title = b.title;
+      spine.appendChild(el('span', '', b.title));
+      spine.onclick = () => {
+        selectedBook = b.title;
+        if (b.title !== NO_TITLE) document.getElementById('bookTitle').value = b.title;
+        renderRead();
+      };
+      row.appendChild(spine);
+    });
+    shelf.appendChild(row);
+  }
+  if (!books.length) shelf.appendChild(el('div', 'shelf-empty', '아직 꽂힌 책이 없어요. 위에서 첫 책을 꽂아보세요.'));
+
+  const detail = document.getElementById('bookDetail');
+  detail.textContent = '';
+  const sel = books.find(b => b.title === selectedBook);
+  if (sel){
+    detail.appendChild(el('h3', '', sel.title + ' — 기록 ' + sel.entries.length + '개'));
+    sel.entries.slice().reverse().forEach(e => {
+      const box = el('div', 'entry');
+      const d = new Date(e.createdAt);
+      box.appendChild(el('div', 'meta', (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')));
+      box.appendChild(el('div', 'body', e.note || ''));
+      detail.appendChild(box);
+    });
+  }
+}
+
+document.getElementById('saveRead').onclick = () => {
+  const title = document.getElementById('bookTitle').value.trim();
+  const note = document.getElementById('readNote').value.trim();
+  const status = document.getElementById('readStatus');
+  if (!note){ status.textContent = '어디까지 읽었는지 적어주세요'; return; }
+  const entries = loadEntries();
+  entries.push({ title, note, createdAt: Date.now() });
+  const ok = saveEntries(entries);
+  status.textContent = ok ? '꽂았어요' : '저장 실패';
+  if (ok){
+    document.getElementById('readNote').value = '';
+    selectedBook = title || NO_TITLE;
+    renderRead();
+  }
+  setTimeout(() => { status.textContent = ''; }, 2000);
+};
+
+renderRead();
+
+/* ---------- theme toggle: auto -> light -> dark ---------- */
+(function(){
+  const THEME_KEY = 'anamnesis_theme';
+  const ORDER = ['auto', 'light', 'dark'];
+  const LABEL = { auto: 'AUTO · 기기 설정', light: 'LIGHT · 밝게', dark: 'DARK · 어둡게' };
+  const btn = document.getElementById('themeBtn');
+  function get(){
+    try { const t = localStorage.getItem(THEME_KEY); return ORDER.indexOf(t) >= 0 ? t : 'auto'; }
+    catch (e) { return 'auto'; }
+  }
+  function apply(t){
+    const r = document.documentElement;
+    if (t === 'auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', t);
+    btn.textContent = LABEL[t];
+  }
+  btn.onclick = function(){
+    const next = ORDER[(ORDER.indexOf(get()) + 1) % ORDER.length];
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    apply(next);
+  };
+  apply(get());
+})();
+</script>
+</body>
+</html>
