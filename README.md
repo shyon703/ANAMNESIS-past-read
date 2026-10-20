@@ -532,6 +532,8 @@
       applyTheme(getTheme());
     })();
 
-    renderRead();
+      renderRead();
   </script>
 </body>
+</html>
+
